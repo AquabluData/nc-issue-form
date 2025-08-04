@@ -242,27 +242,27 @@
         <form id="ncForm">
             <div class="form-group">
                 <label for="submittedBy">Submitted by <span class="required">*</span></label>
-                <input type="text" id="submittedBy" name="submittedBy" required placeholder="Your name">
+                <input type="text" id="submittedBy" name="Submitted by" required placeholder="Your name">
             </div>
             
             <div class="form-group">
                 <label for="imei">IMEI <span class="required">*</span></label>
-                <input type="text" id="imei" name="imei" required placeholder="Device IMEI number">
+                <input type="text" id="imei" name="IMEI" required placeholder="Device IMEI number">
             </div>
             
             <div class="form-group">
                 <label for="issueDescription">Issue description <span class="required">*</span></label>
-                <textarea id="issueDescription" name="issueDescription" required placeholder="Describe the issue in detail"></textarea>
+                <textarea id="issueDescription" name="Issue description" required placeholder="Describe the issue in detail"></textarea>
             </div>
             
             <div class="form-group">
                 <label for="stepsTaken">Steps taken <span class="required">*</span></label>
-                <textarea id="stepsTaken" name="stepsTaken" required placeholder="What troubleshooting steps have been taken?"></textarea>
+                <textarea id="stepsTaken" name="Steps taken" required placeholder="What troubleshooting steps have been taken?"></textarea>
             </div>
             
             <div class="form-group">
                 <label for="systemStatus">Current system status <span class="required">*</span></label>
-                <select id="systemStatus" name="systemStatus" required>
+                <select id="systemStatus" name="Current system status" required>
                     <option value="">Select status...</option>
                     <option value="Operational">Operational</option>
                     <option value="Partially operational">Partially operational</option>
@@ -272,7 +272,7 @@
             
             <div class="form-group">
                 <label for="containment">Do you have a containment for the issue?</label>
-                <select id="containment" name="containment">
+                <select id="containment" name="Do you have a containment for the issue?">
                     <option value="">Select...</option>
                     <option value="Yes">Yes</option>
                     <option value="No">No</option>
@@ -370,16 +370,39 @@
             // Add metadata
             data.submittedAt = new Date().toISOString();
             
+            // Debug: Log the data being sent
+            console.log('Submitting data:', data);
+            console.log('To webhook:', CONFIG.formSubmitWebhook);
+            
             try {
                 const response = await fetch(CONFIG.formSubmitWebhook, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    mode: 'cors' // Explicitly set CORS mode
                 });
                 
-                if (!response.ok) throw new Error('Submission failed');
+                // Debug: Log response details
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error(`Submission failed: ${response.status} ${response.statusText}`);
+                }
+                
+                // Try to parse response
+                let responseData;
+                try {
+                    responseData = await response.json();
+                    console.log('Response data:', responseData);
+                } catch (e) {
+                    // Response might not be JSON
+                    console.log('Response is not JSON');
+                }
                 
                 // Show success message
                 showSuccess('Issue submitted successfully! The case has been created in Asana.');
@@ -392,7 +415,15 @@
                 
             } catch (error) {
                 console.error('Submission error:', error);
-                showError('Failed to submit the form. Please try again or contact support.');
+                
+                // More specific error messages
+                if (error.message.includes('Failed to fetch')) {
+                    showError('Unable to connect to the server. This might be a CORS issue. Please check the webhook configuration.');
+                } else if (error.message.includes('NetworkError')) {
+                    showError('Network error. Please check your internet connection and try again.');
+                } else {
+                    showError(`Error: ${error.message}. Please try again or contact support.`);
+                }
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = originalButtonText;
