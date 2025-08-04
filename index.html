@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NC Issue Log</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #444;
+            font-weight: 500;
+        }
+        
+        .required {
+            color: #e74c3c;
+            margin-left: 3px;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        select {
+            cursor: pointer;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #efe;
+            border: 1px solid #cfc;
+            color: #060;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-message {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NC Issue Log</h1>
+        <p class="subtitle">Submit a new non-conformance issue</p>
+        
+        <div class="error" id="errorMessage"></div>
+        <div class="success" id="successMessage"></div>
+        
+        <form id="ncForm">
+            <div class="form-group">
+                <label for="submittedBy">Submitted by <span class="required">*</span></label>
+                <input type="text" id="submittedBy" name="submittedBy" required placeholder="Your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="imei">IMEI <span class="required">*</span></label>
+                <input type="text" id="imei" name="imei" required placeholder="Device IMEI number">
+            </div>
+            
+            <div class="form-group">
+                <label for="issueDescription">Issue description <span class="required">*</span></label>
+                <textarea id="issueDescription" name="issueDescription" required placeholder="Describe the issue in detail"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="stepsTaken">Steps taken <span class="required">*</span></label>
+                <textarea id="stepsTaken" name="stepsTaken" required placeholder="What troubleshooting steps have been taken?"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="systemStatus">Current system status <span class="required">*</span></label>
+                <select id="systemStatus" name="systemStatus" required>
+                    <option value="">Select status...</option>
+                    <option value="Operational">Operational</option>
+                    <option value="Partially operational">Partially operational</option>
+                    <option value="Offline">Offline</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="containment">Do you have a containment for the issue?</label>
+                <select id="containment" name="containment">
+                    <option value="">Select...</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                    <option value="n/a">n/a</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="ncSelect">NC <span class="required">*</span></label>
+                <select id="ncSelect" name="NC" required>
+                    <option value="">Loading NC options...</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="submitButton">Submit Issue</button>
+        </form>
+    </div>
+    
+    <script>
+        // Configuration - Update these with your actual URLs
+        const CONFIG = {
+            // Update this with your n8n instance URL
+            ncOptionsWebhook: 'https://your-n8n-instance.com/webhook/nc-options',
+            formSubmitWebhook: 'https://your-n8n-instance.com/webhook/nc-form-submit'
+        };
+        
+        // Load NC options when page loads
+        async function loadNCOptions() {
+            const selectElement = document.getElementById('ncSelect');
+            
+            try {
+                const response = await fetch(CONFIG.ncOptionsWebhook);
+                if (!response.ok) throw new Error('Failed to fetch NC options');
+                
+                const data = await response.json();
+                
+                // Clear loading message
+                selectElement.innerHTML = '<option value="">Select NC...</option>';
+                
+                // Add existing NC options
+                if (data.existingNCs && data.existingNCs.length > 0) {
+                    data.existingNCs.forEach(nc => {
+                        const option = document.createElement('option');
+                        option.value = `${nc.number} - ${nc.description}`;
+                        option.textContent = `${nc.number} - ${nc.description}`;
+                        selectElement.appendChild(option);
+                    });
+                }
+                
+                // Add separator
+                const separator = document.createElement('option');
+                separator.disabled = true;
+                separator.textContent = '──────────';
+                selectElement.appendChild(separator);
+                
+                // Add New and Other options
+                const newOption = document.createElement('option');
+                newOption.value = 'New';
+                newOption.textContent = 'New NC';
+                selectElement.appendChild(newOption);
+                
+                const otherOption = document.createElement('option');
+                otherOption.value = 'Other';
+                otherOption.textContent = 'Other';
+                selectElement.appendChild(otherOption);
+                
+            } catch (error) {
+                console.error('Error loading NC options:', error);
+                selectElement.innerHTML = `
+                    <option value="">Error loading options</option>
+                    <option value="New">New NC</option>
+                    <option value="Other">Other</option>
+                `;
+                showError('Failed to load NC options. You can still submit with "New" or "Other".');
+            }
+        }
+        
+        // Handle form submission
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            const submitButton = document.getElementById('submitButton');
+            const originalButtonText = submitButton.textContent;
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Submitting... <span class="loading"></span>';
+            
+            // Hide any previous messages
+            hideMessages();
+            
+            // Collect form data
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            // Add metadata
+            data.submittedAt = new Date().toISOString();
+            
+            try {
+                const response = await fetch(CONFIG.formSubmitWebhook, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) throw new Error('Submission failed');
+                
+                // Show success message
+                showSuccess('Issue submitted successfully! The case has been created in Asana.');
+                
+                // Reset form
+                event.target.reset();
+                
+                // Reload NC options to get any new ones
+                await loadNCOptions();
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                showError('Failed to submit the form. Please try again or contact support.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        }
+        
+        // Utility functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+        }
+        
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNCOptions();
+            document.getElementById('ncForm').addEventListener('submit', handleSubmit);
+        });
+    </script>
+</body>
+</html>

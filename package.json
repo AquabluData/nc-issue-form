@@ -1,0 +1,11 @@
+{
+  "name": "nc-issue-form",
+  "version": "1.0.0",
+  "description": "Dynamic NC Issue Submission Form",
+  "scripts": {
+    "start": "npx http-server -p ${PORT:-3000} --cors"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
